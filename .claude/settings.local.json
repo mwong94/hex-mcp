@@ -4,7 +4,10 @@
       "Bash(python3 *)",
       "Bash(claude mcp *)",
       "Bash(uv run *)",
-      "Bash(uvx mcp-proxy *)"
+      "Bash(uvx mcp-proxy *)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
