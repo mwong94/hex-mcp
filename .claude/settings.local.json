@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 *)",
+      "Bash(claude mcp *)",
+      "Bash(uv run *)",
+      "Bash(uvx mcp-proxy *)"
+    ]
+  }
+}
