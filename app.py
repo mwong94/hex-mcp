@@ -975,4 +975,15 @@ def duplicate_cell(
 # ===================================================================
 
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http", host="0.0.0.0", port=8000)
+    # Default to stdio so the server works when a client spawns it as a
+    # subprocess.  Set MCP_TRANSPORT=streamable-http (plus MCP_HOST / MCP_PORT)
+    # to run it as a long-lived HTTP service instead.
+    transport = os.getenv("MCP_TRANSPORT", "stdio")
+    if transport == "stdio":
+        mcp.run(transport="stdio")
+    else:
+        mcp.run(
+            transport=transport,
+            host=os.getenv("MCP_HOST", "0.0.0.0"),
+            port=int(os.getenv("MCP_PORT", "8386")),
+        )
