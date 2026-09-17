@@ -51,7 +51,9 @@ openssl rand -hex 32   # use this as MCP_API_KEY
 Then run it. `app.py` does not read `.env` on its own, so pass it to `uv`:
 
 ```bash
-uv run --env-file .env app.py
+uv run --env-file .env app.py    # or: just run   (stdio)
+just serve                       # HTTP on 127.0.0.1:8000
+just health                      # confirm it answers an initialize
 ```
 
 | Variable | Required | Default | Purpose |
@@ -60,17 +62,47 @@ uv run --env-file .env app.py
 | `MCP_API_KEY` | no* | — | Bearer token clients must present; no auth if unset |
 | `MCP_TRANSPORT` | no | `stdio` | Set to `streamable-http` to run as an HTTP service |
 | `MCP_HOST` | no | `0.0.0.0` | Bind address (use `127.0.0.1` behind a local Caddy) |
-| `MCP_PORT` | no | `8386` | Listen port |
+| `MCP_PORT` | no | `8000` | Listen port (Docker publishes it on host `8386`) |
 | `HEX_BASE_URL` | no | `https://app.hex.tech/api/v1` | Override for self-hosted Hex |
 
 \* Not required by the code, but mandatory in practice for any deployment
 reachable from outside localhost — without it anyone who can reach the port
 can drive your Hex workspace.
 
+## Running in Docker
+
+A thin `uv`-based image (`ghcr.io/astral-sh/uv:python3.14-bookworm-slim`)
+resolves `app.py`'s inline PEP 723 dependencies at build time and runs the
+server as an unprivileged user. The container listens on **8000**; compose
+publishes that on **127.0.0.1:8386**, which is the Caddy upstream.
+
+```bash
+just up             # build + start in the background
+just health-docker  # initialize against http://127.0.0.1:8386/mcp
+just logs           # follow logs
+just down           # stop and remove
+```
+
+`compose.yaml` reads `.env` for `HEX_API_KEY` / `MCP_API_KEY` and overrides
+`MCP_TRANSPORT`, `MCP_HOST` and `MCP_PORT` so the container always matches the
+port mapping. To change the published port, edit the `ports:` entry.
+
+| Recipe | Purpose |
+|---|---|
+| `just build` | Build the image |
+| `just up` | Build and start in the background |
+| `just down` | Stop and remove the container |
+| `just restart` | Restart the container |
+| `just logs` / `just ps` | Follow logs / show status |
+| `just shell` | Shell inside the running container |
+| `just docker-run` | Run the image in the foreground, without compose |
+
 ## Deploying behind Caddy
 
-This is the setup that backs `https://hex-mcp.wongfam.io`: the MCP server
-listens on `127.0.0.1:8386` and Caddy terminates TLS and reverse proxies to it.
+This is the setup that backs `https://hex-mcp.wongfam.io`: something listens on
+`127.0.0.1:8386` — either the Docker container above or the systemd unit below —
+and Caddy terminates TLS and reverse proxies to it. With Docker, skip step 1 and
+run `just up`; steps 2–4 are unchanged.
 
 ### 1. Run the server as a systemd service
 

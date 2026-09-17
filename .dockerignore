@@ -1,0 +1,11 @@
+.git/
+.claude/
+.env
+session-*.md
+__pycache__/
+*.pyc
+README.md
+justfile
+Dockerfile
+compose.yaml
+.dockerignore

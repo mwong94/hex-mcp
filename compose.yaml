@@ -1,0 +1,27 @@
+services:
+  hex-mcp:
+    build: .
+    image: hex-mcp:local
+    container_name: hex-mcp
+    # HEX_API_KEY / MCP_API_KEY come from .env; the transport settings below
+    # override anything .env says, so the container always matches the mapping.
+    env_file: .env
+    environment:
+      MCP_TRANSPORT: streamable-http
+      MCP_HOST: 0.0.0.0
+      MCP_PORT: "8000"
+    # Published on 8386 to match the Caddy upstream; localhost-only so the
+    # container is not reachable from the LAN.
+    ports:
+      - "127.0.0.1:8386:8000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import socket,sys; s=socket.create_connection(("127.0.0.1",8000),3); s.close()
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

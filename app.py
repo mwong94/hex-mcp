@@ -985,5 +985,5 @@ if __name__ == "__main__":
         mcp.run(
             transport=transport,
             host=os.getenv("MCP_HOST", "0.0.0.0"),
-            port=int(os.getenv("MCP_PORT", "8386")),
+            port=int(os.getenv("MCP_PORT", "8000")),
         )
